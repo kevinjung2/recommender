@@ -1,7 +1,7 @@
 // Example model schema from the Drizzle docs
 // https://orm.drizzle.team/docs/sql-schema-declaration
 
-import { sql } from "drizzle-orm";
+import { sql, relations } from "drizzle-orm";
 import {
   index,
   integer,
@@ -81,7 +81,7 @@ export const recommendations = createTable(
     primaryCategoryId: integer("primary_category_id").references(
       () => primaryCategories.id,
     ),
-    secondaryCategory: integer("secondary_category_id").references(
+    secondaryCategoryId: integer("secondary_category_id").references(
       () => secondaryCategories.id,
     ),
     createdAt: timestamp("created_at", { withTimezone: true })
@@ -90,6 +90,9 @@ export const recommendations = createTable(
     updatedAt: timestamp("updated_at", { withTimezone: true }).$onUpdate(
       () => new Date(),
     ),
+	userId: integer("user_id").references(
+		() => users.id
+	)
   },
   (table) => ({
     recommendationsIndex: index("recommendations_idx").on(table.name),
@@ -117,3 +120,30 @@ export const reviews = createTable(
     ratingIndex: index("rating_idx").on(table.rating),
   }),
 );
+
+export const recommendationRelations = relations(recommendations, ({ one }) => ({
+	primaryCategory: one(primaryCategories, {
+		fields: [recommendations.primaryCategoryId],
+		references: [primaryCategories.id]
+	}),
+	secondaryCategory: one(secondaryCategories, {
+		fields: [recommendations.secondaryCategoryId],
+		references: [secondaryCategories.id]
+	}),
+	user: one(users, {
+		fields: [recommendations.userId],
+		references: [users.id]
+	})
+}));
+
+export const primaryCategoryRelations = relations(primaryCategories, ({ many }) => ({
+	recommendations: many(primaryCategories),
+}));
+
+export const secondaryCategoryRelations = relations(secondaryCategories, ({ many }) => ({
+	recommendations: many(secondaryCategories),
+}));
+
+export const userRecommendationRelations = relations(users, ({many}) => ({
+	recommendations: many(users)
+}));
