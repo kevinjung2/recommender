@@ -1,7 +1,7 @@
 // Example model schema from the Drizzle docs
 // https://orm.drizzle.team/docs/sql-schema-declaration
 
-import { sql, relations } from "drizzle-orm";
+import { sql, relations, InferSelectModel } from "drizzle-orm";
 import {
   index,
   integer,
@@ -147,3 +147,5 @@ export const secondaryCategoryRelations = relations(secondaryCategories, ({ many
 export const userRecommendationRelations = relations(users, ({many}) => ({
 	recommendations: many(users)
 }));
+
+export type Recommendations = InferSelectModel<typeof recommendations>

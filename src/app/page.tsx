@@ -1,16 +1,9 @@
-import { db } from "~/server/db";
-import AgGridReact from "./_components/ag-grid";
-import { darkBlueTheme } from "./_components/ag-grid";
+import type { ColDef } from "ag-grid-community";
+import { getRecommendations } from "../server/queries"
+import Grid from "./_components/ag-grid";
 
-//TDOD move getrecos to api call and make this function synchronous then use useState to set table data to see if that fixes table rendering issue
 export default async function HomePage() {
-	const recos = await db.query.recommendations.findMany({
-		with: {
-			primaryCategory: true,
-			secondaryCategory: true,
-			user: true
-		}
-	})
+	const recos = await getRecommendations();
 	const rowData = recos.map(reco => {
 		return ({
 			name: reco.name,
@@ -20,18 +13,18 @@ export default async function HomePage() {
 			ratings: "Not Implemented"
 		})
 	})
-	const colDefs = [
-		{name: 'name', flex: 2},
-		{type: 'type', flex: 1},
-		{tags: 'tags', flex: 1},
-		{user: 'user', flex: 1},
-		{ratings: 'ratings', flex: 1}
+	const colDefs: ColDef[] = [
+		{field: 'name', flex: 2},
+		{field: 'type', flex: 1},
+		{field: 'tags', flex: 1},
+		{field: 'user', flex: 1},
+		{field: 'ratings', flex: 1}
 	]
-
+    console.log("from home", rowData, colDefs)
   return (
 	<main>
-		<div style={{height: 500}}className="px-8 ">
-			<AgGridReact theme={darkBlueTheme} columnDefs={colDefs} rowData={rowData} />
+		<div className="px-8 ">
+            {rowData ? <Grid colDefsProp={colDefs} rowDataProp={rowData} height={500}/> : <div>Loading...</div>}
 		</div>
 	</main>
   );
